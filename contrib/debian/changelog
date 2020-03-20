@@ -1,3 +1,9 @@
+freediameter (1.2.0-2) unstable; urgency=low
+
+  * Packaged for Cinar project
+
+ -- Murat Demirten <mdemirten@yh.com.tr>  Fri, 20 Mar 2020 17:05:20 +0300
+
 freediameter (1.2.0) UNRELEASED; urgency=low
 
   * Major changes in the logging system to be more syslog and production friendly

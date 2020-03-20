@@ -24,8 +24,23 @@ skip_the_tests=-DBUILD_TESTING:BOOL=OFF
 
 override_dh_auto_configure:
 	dh_auto_configure -- $(skip_the_tests) \
+		-DBUILD_DICT_DCCA_STARENT=OFF \
+		-DBUILD_DICT_EAP=OFF \
+		-DBUILD_DICT_MIP6A=OFF \
+		-DBUILD_DICT_MIP6I=OFF \
+		-DBUILD_DICT_NAS_MIPV6=OFF \
+		-DBUILD_DICT_RFC5777=OFF \
+		-DBUILD_DICT_SIP=ON \
+		-DBUILD_RT_CHANGE_DH=ON \
+		-DBUILD_TESTING=OFF \
+		-DDIAMID_IDNA_IGNORE=ON \
+		-DFD_PROJECT_NAME=CinarIMS \
+		-DFD_PROJECT_VENDOR_ID=53922 \
 		-DCMAKE_BUILD_TYPE:STRING=DebianPackage \
-		-DDEFAULT_CONF_PATH:PATH=/etc/freeDiameter \
-		-DALL_EXTENSIONS:BOOL=ON
+		-DCMAKE_INSTALL_PREFIX=/opt/cinar
+
+override_dh_shlibdeps:
+	dh_shlibdeps -lopt/cinar/lib
+
 		
 
