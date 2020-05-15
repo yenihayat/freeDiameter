@@ -170,6 +170,13 @@ static int dict_dcca_3gpp_entry(char * conffile)
                 {
                         struct dict_object * vendor;
                         CHECK_FCT(fd_dict_search(fd_g_config->cnf_dict, DICT_VENDOR, VENDOR_BY_NAME, "3GPP", &vendor, ENOENT));
+                        struct dict_application_data app_data = { 16777217, "Sh" };
+                        CHECK_FCT(fd_dict_new(fd_g_config->cnf_dict, DICT_APPLICATION, &app_data, vendor, NULL));
+                }
+
+                {
+                        struct dict_object * vendor;
+                        CHECK_FCT(fd_dict_search(fd_g_config->cnf_dict, DICT_VENDOR, VENDOR_BY_NAME, "3GPP", &vendor, ENOENT));
                         struct dict_application_data app_data = { 16777236, "Rx" };
                         CHECK_FCT(fd_dict_new(fd_g_config->cnf_dict, DICT_APPLICATION, &app_data, vendor, NULL));
                 }
@@ -11344,6 +11351,80 @@ static int dict_dcca_3gpp_entry(char * conffile)
       PARSE_loc_rules(rules, cmd_ppa);
     }
   }
+
+  struct dict_object* sh;
+  CHECK_FCT(fd_dict_search(fd_g_config->cnf_dict, DICT_APPLICATION, APPLICATION_BY_NAME, "Sh", &sh, ENOENT));
+
+  /* User-Data-Request (UDR) Command */
+  {
+    struct dict_object* cmd_uar;
+    struct dict_cmd_data data = {
+      306,                                                    /* Code */
+      "3GPP/User-Data-Request",                               /* Name */
+      CMD_FLAG_REQUEST | CMD_FLAG_PROXIABLE | CMD_FLAG_ERROR, /* Fixed flags */
+      CMD_FLAG_REQUEST | CMD_FLAG_PROXIABLE                   /* Fixed flag values */
+    };
+
+    struct local_rules_definition rules[] =
+    {
+      {  {                      .avp_name = "Session-Id" }, RULE_FIXED_HEAD, -1, 1 },
+      {  {                      .avp_name = "Vendor-Specific-Application-Id" }, RULE_REQUIRED, -1, 1 },
+      {  {                      .avp_name = "Auth-Session-State" }, RULE_REQUIRED, -1, 1 },
+      {  {                      .avp_name = "Origin-Host" }, RULE_REQUIRED, -1, 1 },
+      {  {                      .avp_name = "Origin-Realm" }, RULE_REQUIRED, -1, 1 },
+      {  {                      .avp_name = "Destination-Host" }, RULE_OPTIONAL, -1, 1 },
+      {  {                      .avp_name = "Destination-Realm" }, RULE_REQUIRED, -1, 1 },
+      {  {                      .avp_name = "User-Name" }, RULE_OPTIONAL, -1, 1 },
+      {  { .avp_vendor = 10415, .avp_name = "Supported-Features" }, RULE_OPTIONAL, -1, -1 },
+      {  { .avp_vendor = 10415, .avp_name = "Public-Identity" }, RULE_OPTIONAL, -1, -1 },
+      {  { .avp_vendor = 10415, .avp_name = "Wildcarded-Public-Identity" }, RULE_OPTIONAL, -1, 1 },
+      {  { .avp_vendor = 10415, .avp_name = "Server-Name" }, RULE_REQUIRED, -1, 1 },
+      {  { .avp_vendor = 10415, .avp_name = "Server-Assignment-Type" }, RULE_REQUIRED, -1, 1 },
+      {  {                      .avp_name = "Proxy-Info" }, RULE_OPTIONAL, -1, -1 },
+      {  {                      .avp_name = "Route-Record" }, RULE_OPTIONAL, -1, -1 }
+    };
+
+    CHECK_dict_new(DICT_COMMAND, &data, sh, &cmd_uar);
+    PARSE_loc_rules(rules, cmd_uar);
+  }
+
+  /* User-Data-Answer (UAA) Command */
+  {
+    struct dict_object* cmd_uda;
+    struct dict_cmd_data data = {
+      306,                                                    /* Code */
+      "3GPP/User-Data-Answer",                                /* Name */
+      CMD_FLAG_REQUEST | CMD_FLAG_PROXIABLE | CMD_FLAG_ERROR, /* Fixed flags */
+      CMD_FLAG_PROXIABLE                                      /* Fixed flag values */
+    };
+
+    struct local_rules_definition rules[] =
+    {
+      {  {                      .avp_name = "Session-Id" }, RULE_FIXED_HEAD, -1, 1 },
+      {  {                      .avp_name = "Vendor-Specific-Application-Id" }, RULE_REQUIRED, -1, 1 },
+      {  {                      .avp_name = "Result-Code" }, RULE_OPTIONAL, -1, 1 },
+      {  {                      .avp_name = "Experimental-Result" }, RULE_OPTIONAL, -1, 1 },
+      {  {                      .avp_name = "Auth-Session-State" }, RULE_REQUIRED, -1, 1 },
+      {  {                      .avp_name = "Origin-Host" }, RULE_REQUIRED, -1, 1 },
+      {  {                      .avp_name = "Origin-Realm" }, RULE_REQUIRED, -1, 1 },
+      {  {                      .avp_name = "User-Name" }, RULE_OPTIONAL, -1, 1 },
+      {  { .avp_vendor = 10415, .avp_name = "Supported-Features" }, RULE_OPTIONAL, -1, -1 },
+      {  { .avp_vendor = 10415, .avp_name = "User-Data" }, RULE_OPTIONAL, -1, 1 },
+      {  { .avp_vendor = 10415, .avp_name = "Associated-Identities" }, RULE_OPTIONAL, -1, 1 },
+      {  { .avp_vendor = 10415, .avp_name = "Loose-Route-Indication" }, RULE_OPTIONAL, -1, 1 },
+      {  { .avp_vendor = 10415, .avp_name = "Associated-Registered-Identities" }, RULE_OPTIONAL, -1, 1 },
+      {  { .avp_vendor = 10415, .avp_name = "Server-Name" }, RULE_OPTIONAL, -1, 1 },
+      {  { .avp_vendor = 10415, .avp_name = "Wildcarded-Public-Identity" }, RULE_OPTIONAL, -1, 1 },
+      {  { .avp_vendor = 10415, .avp_name = "Priviledged-Sender-Indication" }, RULE_OPTIONAL, -1, 1 },
+      {  {                      .avp_name = "Failed-AVP" }, RULE_OPTIONAL, -1, -1 },
+      {  {                      .avp_name = "Proxy-Info" }, RULE_OPTIONAL, -1, -1 },
+      {  {                      .avp_name = "Route-Record" }, RULE_OPTIONAL, -1, -1 }
+    };
+
+    CHECK_dict_new(DICT_COMMAND, &data, sh, &cmd_uda);
+    PARSE_loc_rules(rules, cmd_uda);
+  }
+
 
   struct dict_object* rx;
   CHECK_FCT(fd_dict_search(fd_g_config->cnf_dict, DICT_APPLICATION, APPLICATION_BY_NAME, "Rx", &rx, ENOENT));
